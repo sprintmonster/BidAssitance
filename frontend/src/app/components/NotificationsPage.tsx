@@ -5,9 +5,10 @@ import { Bell, AlertCircle, FileText, RefreshCw, XCircle, Settings } from "lucid
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Switch } from "./ui/switch";
 import { Label } from "./ui/label";
+import type { Page } from "../../types/navigation";
 
 interface NotificationsPageProps {
-  onNavigate: (page: string) => void;
+   onNavigate: (page: Page, bidId?: number) => void;
 }
 
 export function NotificationsPage({ onNavigate }: NotificationsPageProps) {

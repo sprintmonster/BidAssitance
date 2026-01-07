@@ -3,11 +3,18 @@ import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { ShoppingCart, Trash2, FileText, Calendar, DollarSign, Building } from "lucide-react";
 import { Separator } from "./ui/separator";
+import type { Page } from "../../types/navigation";
+
+// interface CartPageProps {
+//   cartItems: number[];
+//   onRemoveFromCart: (bidId: number) => void;
+//   onNavigate: (page: string, bidId?: number) => void;
+// }
 
 interface CartPageProps {
-  cartItems: number[];
-  onRemoveFromCart: (bidId: number) => void;
-  onNavigate: (page: string, bidId?: number) => void;
+    cartItems: number[];
+    onRemoveFromCart: (bidId: number) => void;
+    onNavigate: (page: Page, bidId?: number) => void;
 }
 
 export function CartPage({ cartItems, onRemoveFromCart, onNavigate }: CartPageProps) {
@@ -72,7 +79,7 @@ export function CartPage({ cartItems, onRemoveFromCart, onNavigate }: CartPagePr
             <ShoppingCart className="h-16 w-16 text-muted-foreground mb-4" />
             <h3 className="text-xl font-semibold mb-2">장바구니가 비어있습니다</h3>
             <p className="text-muted-foreground mb-6">관심있는 공고를 담아보세요</p>
-            <Button onClick={() => onNavigate("bids")}>공고 찾아보���</Button>
+            <Button onClick={() => onNavigate("bids")}>새로운 공고를 찾아보세요</Button>
           </CardContent>
         </Card>
       ) : (

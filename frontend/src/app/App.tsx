@@ -11,6 +11,8 @@ import { ChatbotPage } from "./components/ChatbotPage";
 import { ProfilePage } from "./components/ProfilePage";
 import { Button } from "./components/ui/button";
 import { Badge } from "./components/ui/badge";
+import type { Page } from "../types/navigation";
+
 import { 
   LayoutDashboard, 
   Search, 
@@ -26,7 +28,7 @@ import {
 } from "lucide-react";
 import { toast, Toaster } from "sonner";
 
-type Page = "login" | "signup" | "dashboard" | "bids" | "analytics" | "summary" | "cart" | "notifications" | "chatbot" | "profile";
+// type Page = "login" | "signup" | "dashboard" | "bids" | "analytics" | "summary" | "cart" | "notifications" | "chatbot" | "profile";
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<Page>("login");
@@ -58,13 +60,19 @@ export default function App() {
     toast.info("로그아웃되었습니다");
   };
 
-  const handleNavigate = (page: Page, bidId?: number) => {
-    setCurrentPage(page);
-    if (bidId !== undefined) {
-      setSelectedBidId(bidId);
-    }
-    setMobileMenuOpen(false);
-  };
+  // const handleNavigate = (page: Page, bidId?: number) => {
+  //   setCurrentPage(page,bidId);
+  //   if (bidId !== undefined) {
+  //     setSelectedBidId(bidId);
+  //   }
+  //   setMobileMenuOpen(false);
+  // };
+    const handleNavigate = (page: Page, bidId?: number) => {
+        setCurrentPage(page);
+        if (bidId !== undefined) {
+            setSelectedBidId(bidId);
+        }
+    };
 
   const handleAddToCart = (bidId: number) => {
     if (!cartItems.includes(bidId)) {
@@ -191,7 +199,11 @@ export default function App() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {currentPage === "dashboard" && <Dashboard onNavigate={handleNavigate} />}
+        {currentPage === "dashboard" && <Dashboard
+            onNavigate={handleNavigate}
+            cart={cartItems}
+        />
+        }
         {currentPage === "bids" && (
           <BidDiscovery onNavigate={handleNavigate} onAddToCart={handleAddToCart} />
         )}

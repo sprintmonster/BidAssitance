@@ -3,12 +3,14 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { Bell, FileText, TrendingUp, AlertCircle, Calendar, DollarSign } from "lucide-react";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
+import type { Page } from "../../types/navigation";
 
 interface DashboardProps {
-  onNavigate: (page: string) => void;
+  onNavigate: (page: Page, bidId? : number) => void;
+  cart : number[];
 }
 
-export function Dashboard({ onNavigate }: DashboardProps) {
+export function Dashboard({ onNavigate, cart }: DashboardProps) {
   // Mock data
   const monthlyBids = [
     { month: "7월", count: 45 },
@@ -53,18 +55,19 @@ export function Dashboard({ onNavigate }: DashboardProps) {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm">관심 공고</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl">24개</div>
-            <p className="text-xs text-muted-foreground">장바구니</p>
-          </CardContent>
-        </Card>
+          <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm">관심 공고</CardTitle>
+                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                  <div className="text-2xl">{cart.length}개</div>
+                  <p className="text-xs text-muted-foreground">장바구니</p>
+              </CardContent>
+          </Card>
 
-        <Card>
+
+          <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm">마감 임박</CardTitle>
             <AlertCircle className="h-4 w-4 text-orange-500" />

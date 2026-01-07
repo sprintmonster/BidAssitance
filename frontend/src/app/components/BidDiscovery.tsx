@@ -7,10 +7,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Search, Filter, MapPin, DollarSign, Calendar, Building, ShoppingCart, FileText } from "lucide-react";
 import { Label } from "./ui/label";
 import { Slider } from "./ui/slider";
+import type { Page } from "../../types/navigation";
 
+// interface BidDiscoveryProps {
+//   onNavigate: (page: string, bidId?: number) => void;
+//   onAddToCart: (bidId: number) => void;
+// }
 interface BidDiscoveryProps {
-  onNavigate: (page: string, bidId?: number) => void;
-  onAddToCart: (bidId: number) => void;
+    onNavigate: (page: Page, bidId?: number) => void;
+    onAddToCart: (bidId: number) => void;
 }
 
 export function BidDiscovery({ onNavigate, onAddToCart }: BidDiscoveryProps) {

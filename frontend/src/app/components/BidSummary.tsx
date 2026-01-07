@@ -5,10 +5,11 @@ import { Separator } from "./ui/separator";
 import { Building, MapPin, Calendar, DollarSign, FileText, AlertTriangle, CheckCircle2, Clock, TrendingUp, ArrowLeft } from "lucide-react";
 import { Progress } from "./ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import type { Page } from "../../types/navigation";
 
 interface BidSummaryProps {
   bidId?: number;
-  onNavigate: (page: string) => void;
+  onNavigate: (page: Page, bidId?: number) => void;
 }
 
 export function BidSummary({ bidId, onNavigate }: BidSummaryProps) {
