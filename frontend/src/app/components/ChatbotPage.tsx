@@ -1,4 +1,4 @@
-import { useState } from "react";
+// import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
@@ -6,6 +6,8 @@ import { ScrollArea } from "./ui/scroll-area";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { Send, Bot, User } from "lucide-react";
 import { Badge } from "./ui/badge";
+import { useState, useRef, useEffect } from "react";
+
 
 interface Message {
   id: number;
@@ -16,7 +18,9 @@ interface Message {
 }
 
 export function ChatbotPage() {
+
   const [messages, setMessages] = useState<Message[]>([
+
     {
       id: 1,
       text: "안녕하세요! 입찰 인텔리전스 AI 어시스턴트입니다. 무엇을 도와드릴까요?",
@@ -31,6 +35,7 @@ export function ChatbotPage() {
     },
   ]);
   const [inputValue, setInputValue] = useState("");
+  const bottomRef = useRef<HTMLDivElement | null>(null);
 
   const handleSend = () => {
     if (!inputValue.trim()) return;
@@ -51,6 +56,12 @@ export function ChatbotPage() {
       setMessages(prev => [...prev, botResponse]);
     }, 1000);
   };
+    useEffect(() => {
+        bottomRef.current?.scrollIntoView({
+            behavior: "smooth",
+            block: "end",
+        });
+    }, [messages]);
 
   const generateBotResponse = (userInput: string): Message => {
     const input = userInput.toLowerCase();
@@ -100,14 +111,16 @@ export function ChatbotPage() {
   };
 
   return (
-    <div className="space-y-6">
+      <div className="space-y-6 max-h-full overflow-hidden">
+
+      {/*<div className="space-y-6">*/}
       <div>
         <h2 className="text-3xl mb-2">AI 어시스턴트</h2>
         <p className="text-muted-foreground">입찰 관련 질문을 자유롭게 물어보세요</p>
       </div>
 
-      <Card className="h-[600px] flex flex-col">
-        <CardHeader className="border-b">
+        <Card className="h-[600px] flex flex-col">
+            <CardHeader className="border-b shrink-0">
           <div className="flex items-center gap-3">
             <Avatar>
               <AvatarFallback className="bg-blue-600 text-white">
@@ -124,9 +137,9 @@ export function ChatbotPage() {
           </div>
         </CardHeader>
 
-        <ScrollArea className="flex-1 p-4">
-          <div className="space-y-4">
-            {messages.map((message) => (
+            <ScrollArea className="flex-1 overflow-hidden">
+                <div className="h-full overflow-y-auto p-4 space-y-4">
+                    {messages.map((message) => (
               <div key={message.id} className={`flex gap-3 ${message.sender === "user" ? "flex-row-reverse" : ""}`}>
                 <Avatar className="flex-shrink-0">
                   <AvatarFallback className={message.sender === "bot" ? "bg-blue-600 text-white" : "bg-gray-600 text-white"}>
@@ -137,10 +150,11 @@ export function ChatbotPage() {
                   <div className={`rounded-lg p-4 ${
                     message.sender === "bot" ? "bg-gray-100" : "bg-blue-600 text-white"
                   }`}>
+
                     <p className="text-sm whitespace-pre-line">{message.text}</p>
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">{message.timestamp}</p>
-                  
+
                   {message.suggestions && message.suggestions.length > 0 && (
                     <div className="flex flex-wrap gap-2 mt-3">
                       {message.suggestions.map((suggestion, index) => (
@@ -158,10 +172,11 @@ export function ChatbotPage() {
                 </div>
               </div>
             ))}
+              <div ref={bottomRef} />
           </div>
         </ScrollArea>
 
-        <CardContent className="border-t pt-4">
+            <CardContent className="border-t pt-4 shrink-0">
           <div className="flex gap-2">
             <Input
               placeholder="메시지를 입력하세요..."
