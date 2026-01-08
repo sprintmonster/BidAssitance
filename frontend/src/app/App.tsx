@@ -16,21 +16,23 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./com
 import { Input } from "./components/ui/input";
 
 import type { Page } from "../types/navigation";
+
 import {
   LayoutDashboard,
   Search,
   TrendingUp,
   ShoppingCart,
   Bell,
-  MessageSquare,
   User,
   Building2,
   LogOut,
   Menu,
   X,
+  Megaphone,
+  MessageSquare,
   Sparkles,
-  LogIn,
 } from "lucide-react";
+
 import { toast, Toaster } from "sonner";
 
 /**
@@ -50,167 +52,225 @@ function isPublicPage(page: Page) {
   return page === "home" || page === "login" || page === "signup";
 }
 
-function HomeLanding({
+/** Home 본문(헤더/푸터 제외) */
+function HomeContent({
+  isAuthenticated,
+  userEmail,
+  cartCount,
+  unreadCount,
+  onNavigate,
   onGoLogin,
   onGoSignup,
-  onNavigate,
+  onLogout,
+  onOpenChatbot,
 }: {
+  isAuthenticated: boolean;
+  userEmail: string;
+  cartCount: number;
+  unreadCount: number;
+  onNavigate: (page: Page) => void;
   onGoLogin: () => void;
   onGoSignup: () => void;
-  onNavigate: (page: Page) => void;
+  onLogout: () => void;
+  onOpenChatbot: () => void;
 }) {
-  const [q, setQ] = useState("");
+  const [query, setQuery] = useState("");
 
+  // 요청: 홈 퀵링크 4개만 유지
   const quickLinks = useMemo(
     () => [
       { id: "dashboard" as Page, label: "대시보드", icon: LayoutDashboard },
       { id: "bids" as Page, label: "공고 찾기", icon: Search },
-      { id: "analytics" as Page, label: "낙찰 분석", icon: TrendingUp },
-      { id: "cart" as Page, label: "장바구니", icon: ShoppingCart },
-      { id: "notifications" as Page, label: "알림", icon: Bell },
-      { id: "chatbot" as Page, label: "AI 챗봇", icon: MessageSquare },
+      { id: "cart" as Page, label: "장바구니", icon: ShoppingCart, badge: cartCount },
       { id: "profile" as Page, label: "마이페이지", icon: User },
     ],
-    []
+    [cartCount]
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Toaster position="top-right" />
+    <div className="grid grid-cols-12 gap-6">
+      {/* 중앙 */}
+      <div className="col-span-12 lg:col-span-8 space-y-6">
+        {/* 퀵 링크 박스들 */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {quickLinks.map((x) => {
+            const Icon = x.icon;
+            return (
+              <button key={x.id} onClick={() => onNavigate(x.id)} className="text-left">
+                <Card className="hover:shadow-sm transition">
+                  <CardContent className="p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="h-9 w-9 rounded-md bg-gray-100 flex items-center justify-center">
+                        <Icon className="h-4 w-4" />
+                      </div>
+                      <div className="font-medium">{x.label}</div>
+                    </div>
+                    {"badge" in x && x.badge && x.badge > 0 ? <Badge>{x.badge}</Badge> : null}
+                  </CardContent>
+                </Card>
+              </button>
+            );
+          })}
+        </div>
 
-      <header className="bg-white border-b sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-3">
-              <div className="bg-blue-600 p-2 rounded-lg">
-                <Building2 className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold">입찰 인텔리전스</h1>
-                <p className="text-xs text-muted-foreground hidden sm:block">
-                  Smart Procurement Platform
-                </p>
-              </div>
-            </div>
+        {/* AI 검색 패널 */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5" />
+              AI를 활용한 검색
+            </CardTitle>
+            <CardDescription>자연어로 검색 조건을 입력하면, 공고 탐색/분석 흐름으로 연결합니다.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder='예: "서울/경기 10억~50억 시설공사, 마감 임박 우선"'
+            />
 
-            <div className="flex items-center gap-2">
-              <Button variant="outline" onClick={onGoLogin} className="gap-2">
-                <LogIn className="h-4 w-4" />
-                로그인
+            <div className="flex gap-2">
+              <Button
+                className="gap-2"
+                onClick={() => {
+                  if (!query.trim()) {
+                    toast.info("검색어를 입력해 주세요.");
+                    return;
+                  }
+                  localStorage.setItem("chatbot.initialQuery", query.trim());
+                  onOpenChatbot();
+                }}
+              >
+                <Sparkles className="h-4 w-4" />
+                AI로 검색
               </Button>
-              <Button onClick={onGoSignup}>회원가입</Button>
-            </div>
-          </div>
-        </div>
-      </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-12 gap-6">
-          {/* 중앙 */}
-          <div className="col-span-12 lg:col-span-8 space-y-6">
-            {/* 메뉴로 이동하는 박스들 */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {quickLinks.map((x) => {
-                const Icon = x.icon;
-                return (
-                  <button key={x.id} onClick={() => onNavigate(x.id)} className="text-left">
-                    <Card className="hover:shadow-sm transition">
-                      <CardContent className="p-4 flex items-center gap-3">
-                        <div className="h-9 w-9 rounded-md bg-gray-100 flex items-center justify-center">
-                          <Icon className="h-4 w-4" />
-                        </div>
-                        <div className="font-medium">{x.label}</div>
-                      </CardContent>
-                    </Card>
-                  </button>
-                );
-              })}
+              <Button variant="outline" onClick={() => onNavigate("bids")}>
+                공고 리스트로 이동
+              </Button>
             </div>
 
-            {/* AI 검색 패널 */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Sparkles className="h-5 w-5" />
-                  AI를 활용한 검색
-                </CardTitle>
-                <CardDescription>
-                  자연어로 검색 조건을 입력하면, 공고 탐색/분석 흐름으로 연결합니다.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Input
-                  value={q}
-                  onChange={(e) => setQ(e.target.value)}
-                  placeholder='예: "서울/경기 10억~50억 시설공사, 마감 임박 우선"'
-                />
-                <div className="flex gap-2">
-                  <Button
-                    className="gap-2"
-                    onClick={() => {
-                      if (!q.trim()) {
-                        toast.info("검색어를 입력해 주세요.");
-                        return;
-                      }
-                      // 비로그인 상태에서 바로 AI 기능 접근은 막히므로,
-                      // 사용자는 요구사항대로 로그인 페이지로 이동하게 됩니다.
-                      // (실제 이동/차단 로직은 App.handleNavigate에서 수행)
-                      localStorage.setItem("chatbot.initialQuery", q.trim());
-                      onNavigate("chatbot");
-                    }}
-                  >
-                    <Sparkles className="h-4 w-4" />
-                    AI로 검색
-                  </Button>
-                  <Button variant="outline" onClick={() => onNavigate("bids")}>
-                    공고 리스트로 이동
-                  </Button>
+            <p className="text-sm text-muted-foreground">
+              로그인 후 검색 결과 탐색, 저장, 알림 연동 기능을 이용할 수 있습니다.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* 우측: 로그인(축소) / 회원정보 */}
+      <div className="col-span-12 lg:col-span-4 space-y-6">
+        {!isAuthenticated ? (
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">로그인</CardTitle>
+              <CardDescription className="text-sm">
+                로그인하면 공고/장바구니/알림/AI 기능을 이용할 수 있습니다.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <Button size="sm" className="w-full" onClick={onGoLogin}>
+                로그인 페이지로 이동
+              </Button>
+              <Button size="sm" variant="outline" className="w-full" onClick={onGoSignup}>
+                회원가입
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">회원 정보</CardTitle>
+              <CardDescription className="text-sm">현재 로그인된 계정 정보입니다.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div>
+                <div className="font-semibold">김철수</div>
+                <div className="text-sm text-muted-foreground">{userEmail}</div>
+                <div className="flex gap-2 pt-2">
+                  <Badge>호반건설</Badge>
+                  <Badge variant="outline">중형 건설사</Badge>
                 </div>
+              </div>
 
-                <p className="text-sm text-muted-foreground">
-                  로그인 후 검색 결과 탐색, 저장, 알림 연동 기능을 이용할 수 있습니다.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
+              <div className="grid grid-cols-2 gap-2">
+                <Button size="sm" variant="outline" onClick={() => onNavigate("profile")}>
+                  마이페이지
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => onNavigate("cart")}>
+                  장바구니
+                </Button>
+              </div>
 
-          {/* 우측: 로그인 박스 */}
-          <div className="col-span-12 lg:col-span-4 space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <LogIn className="h-5 w-5" />
-                  로그인
-                </CardTitle>
-                <CardDescription>
-                  로그인하면 공고/장바구니/알림/AI 기능을 이용할 수 있습니다.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Button className="w-full" onClick={onGoLogin}>
-                  로그인 페이지로 이동
-                </Button>
-                <Button className="w-full" variant="outline" onClick={onGoSignup}>
-                  회원가입
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
+              <Button size="sm" variant="ghost" className="w-full justify-start" onClick={onLogout}>
+                <LogOut className="h-4 w-4 mr-2" />
+                로그아웃
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/** 챗봇 모달 */
+function ChatbotModal({
+  open,
+  onClose,
+  isAuthenticated,
+  onGoLogin,
+}: {
+  open: boolean;
+  onClose: () => void;
+  isAuthenticated: boolean;
+  onGoLogin: () => void;
+}) {
+  if (!open) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-50 bg-black/40 flex items-end sm:items-center justify-center p-3"
+      onMouseDown={onClose}
+    >
+      <div
+        className="bg-white w-full sm:max-w-3xl h-[82vh] rounded-xl shadow-xl flex flex-col overflow-hidden"
+        onMouseDown={(e) => e.stopPropagation()}
+      >
+        <div className="px-4 py-3 border-b flex items-center justify-between">
+          <div className="font-semibold">AI 챗봇</div>
+          <Button variant="ghost" size="sm" onClick={onClose}>
+            <X className="h-4 w-4" />
+          </Button>
         </div>
-      </main>
 
-      <footer className="bg-white border-t mt-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-sm text-muted-foreground">© 2026 입찰 인텔리전스. All rights reserved.</p>
-            <div className="flex gap-4 text-sm text-muted-foreground">
-              <a href="#" className="hover:text-blue-600">이용약관</a>
-              <a href="#" className="hover:text-blue-600">개인정보처리방침</a>
-              <a href="#" className="hover:text-blue-600">고객지원</a>
+        <div className="flex-1 overflow-auto">
+          {isAuthenticated ? (
+            <div className="p-4">
+              <ChatbotPage />
             </div>
-          </div>
+          ) : (
+            <div className="p-6 space-y-3">
+              <div className="font-semibold">로그인이 필요합니다</div>
+              <div className="text-sm text-muted-foreground">
+                챗봇 기능을 사용하려면 로그인 후 이용해 주세요.
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => {
+                    onClose();
+                    onGoLogin();
+                  }}
+                >
+                  로그인으로 이동
+                </Button>
+                <Button variant="outline" onClick={onClose}>
+                  닫기
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
-      </footer>
+      </div>
     </div>
   );
 }
@@ -223,6 +283,12 @@ export default function App() {
   const [selectedBidId, setSelectedBidId] = useState<number | undefined>();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  // 알림 뱃지(현재는 임시; 실제 unread 상태 붙이면 여기만 연결)
+  const [unreadCount] = useState<number>(0);
+
+  // 챗봇 모달
+  const [chatbotOpen, setChatbotOpen] = useState(false);
+
   const navigateTo = (page: Page, bidId?: number, replace: boolean = false) => {
     const next: NavState = { page, bidId };
 
@@ -234,13 +300,12 @@ export default function App() {
     setMobileMenuOpen(false);
   };
 
-  // ---- history sync (핵심) ----
+  // ---- history sync ----
   useEffect(() => {
     const st = window.history.state;
 
-    // 최초 로드: state가 없으면 home으로 초기화
+    // 최초 로드: state가 없으면 home
     if (isNavState(st) && st.page) {
-      // 보호 페이지를 비로그인 상태에서 직접 진입/새로고침한 경우 → 로그인으로 강제
       if (!isAuthenticated && !isPublicPage(st.page)) {
         toast.info("로그인이 필요합니다.");
         window.history.replaceState({ page: "login" } satisfies NavState, "");
@@ -261,7 +326,6 @@ export default function App() {
 
       const nextPage = e.state.page;
 
-      // 브라우저 뒤/앞으로 보호 페이지 접근도 차단
       if (!isAuthenticated && !isPublicPage(nextPage)) {
         toast.info("로그인이 필요합니다.");
         window.history.replaceState({ page: "login" } satisfies NavState, "");
@@ -280,40 +344,57 @@ export default function App() {
     return () => window.removeEventListener("popstate", onPopState);
   }, [isAuthenticated]);
 
+  /**
+   * 요구사항 반영 1) 로그인 성공 시 dashboard로 이동하지 않고 home 유지
+   */
   const handleLogin = (email: string) => {
     setIsAuthenticated(true);
     setUserEmail(email);
-    // 로그인 후에는 login 히스토리를 dashboard로 "대체"해서 back이 login으로 가지 않게 함
-    navigateTo("dashboard", undefined, true);
+
+    // login 엔트리를 home으로 대체
+    navigateTo("home", undefined, true);
     toast.success("로그인되었습니다");
   };
 
+  /**
+   * 가입도 동일 정책: 가입 후 home 유지
+   */
   const handleSignup = (email: string) => {
     setIsAuthenticated(true);
     setUserEmail(email);
-    navigateTo("dashboard", undefined, true);
+
+    navigateTo("home", undefined, true);
     toast.success("회원가입이 완료되었습니다");
   };
 
+  /**
+   * 요구사항 반영 2) 로그아웃 시에도 login이 아니라 home 유지
+   */
   const handleLogout = () => {
     setIsAuthenticated(false);
     setUserEmail("");
     setCartItems([]);
     setSelectedBidId(undefined);
 
-    // 로그아웃 시 현재 엔트리를 login으로 대체
-    navigateTo("login", undefined, true);
+    // 어떤 페이지에 있든 home으로 "대체"
+    navigateTo("home", undefined, true);
     toast.info("로그아웃되었습니다");
   };
 
   const handleNavigate = (page: Page, bidId?: number) => {
-    // 비로그인 상태: home/login/signup만 허용
+    // 챗봇은 모달로
+    if (page === "chatbot") {
+      setChatbotOpen(true);
+      return;
+    }
+
+    // 비로그인: home/login/signup만 허용, 나머지는 로그인으로
     if (!isAuthenticated && !isPublicPage(page)) {
       toast.info("로그인이 필요합니다.");
-      // replace 권장: 막힌 이동을 히스토리에 남기지 않음
       navigateTo("login", undefined, true);
       return;
     }
+
     navigateTo(page, bidId, false);
   };
 
@@ -331,42 +412,148 @@ export default function App() {
     toast.success("장바구니에서 제거되었습니다");
   };
 
-  // ---- 비로그인: 기존 로그인/회원가입 페이지는 그대로 사용 ----
+  // -------------------------
+  // 비로그인: login/signup은 기존 그대로, home은 노출
+  // -------------------------
   if (!isAuthenticated) {
     if (currentPage === "signup") {
       return (
-        <SignupPage
-          onSignup={handleSignup}
-          onNavigateToLogin={() => navigateTo("login")}
-        />
-      );
-    }
-    if (currentPage === "login") {
-      return (
-        <LoginPage
-          onLogin={handleLogin}
-          onNavigateToSignup={() => navigateTo("signup")}
-        />
+        <>
+          <Toaster position="top-right" />
+          <SignupPage onSignup={handleSignup} onNavigateToLogin={() => navigateTo("login")} />
+        </>
       );
     }
 
-    // home은 비로그인이어도 보여준다
+    if (currentPage === "login") {
+      return (
+        <>
+          <Toaster position="top-right" />
+          <LoginPage onLogin={handleLogin} onNavigateToSignup={() => navigateTo("signup")} />
+        </>
+      );
+    }
+
+    // 비로그인 home: 헤더 우측은 공지/알림(기존 로그인/회원가입 자리 대체)
     return (
-      <HomeLanding
-        onGoLogin={() => navigateTo("login")}
-        onGoSignup={() => navigateTo("signup")}
-        onNavigate={(p) => handleNavigate(p)}
-      />
+      <div className="min-h-screen bg-gray-50">
+        <Toaster position="top-right" />
+
+        <header className="bg-white border-b sticky top-0 z-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-16">
+              <button
+                className="flex items-center gap-3 text-left"
+                onClick={() => navigateTo("home", undefined, true)}
+                type="button"
+              >
+                <div className="bg-blue-600 p-2 rounded-lg">
+                  <Building2 className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-xl font-bold">입찰 인텔리전스</h1>
+                  <p className="text-xs text-muted-foreground hidden sm:block">
+                    Smart Procurement Platform
+                  </p>
+                </div>
+              </button>
+
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-2"
+                  onClick={() => toast.info("공지사항은 준비 중입니다.")}
+                >
+                  <Megaphone className="h-4 w-4" />
+                  공지사항
+                </Button>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-2"
+                  onClick={() => handleNavigate("notifications")}
+                >
+                  <Bell className="h-4 w-4" />
+                  알림
+                  {unreadCount > 0 ? (
+                    <Badge className="ml-2 h-5 w-5 flex items-center justify-center p-0 text-xs">
+                      {unreadCount}
+                    </Badge>
+                  ) : null}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <HomeContent
+            isAuthenticated={false}
+            userEmail=""
+            cartCount={0}
+            unreadCount={unreadCount}
+            onNavigate={(p) => handleNavigate(p)}
+            onGoLogin={() => navigateTo("login")}
+            onGoSignup={() => navigateTo("signup")}
+            onLogout={() => undefined}
+            onOpenChatbot={() => setChatbotOpen(true)}
+          />
+        </main>
+
+        <footer className="bg-white border-t mt-12">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <p className="text-sm text-muted-foreground">© 2026 입찰 인텔리전스. All rights reserved.</p>
+              <div className="flex gap-4 text-sm text-muted-foreground">
+                <a href="#" className="hover:text-blue-600">
+                  이용약관
+                </a>
+                <a href="#" className="hover:text-blue-600">
+                  개인정보처리방침
+                </a>
+                <a href="#" className="hover:text-blue-600">
+                  고객지원
+                </a>
+              </div>
+            </div>
+          </div>
+        </footer>
+
+        {/* 우측 하단 챗봇 버튼(FAB) */}
+        <button
+          type="button"
+          onClick={() => setChatbotOpen(true)}
+          className="fixed bottom-6 right-6 z-40"
+          aria-label="AI 챗봇 열기"
+        >
+          <div className="shadow-lg rounded-full">
+            <Button className="rounded-full h-12 w-12 p-0">
+              <MessageSquare className="h-5 w-5" />
+            </Button>
+          </div>
+        </button>
+
+        <ChatbotModal
+          open={chatbotOpen}
+          onClose={() => setChatbotOpen(false)}
+          isAuthenticated={false}
+          onGoLogin={() => navigateTo("login", undefined, true)}
+        />
+      </div>
     );
   }
 
+  // -------------------------
+  // 로그인 후 앱(기존 상단 네비 + home도 접근 가능)
+  // -------------------------
   const menuItems = [
     { id: "dashboard" as Page, icon: LayoutDashboard, label: "대시보드" },
     { id: "bids" as Page, icon: Search, label: "공고 찾기" },
     { id: "analytics" as Page, icon: TrendingUp, label: "낙찰 분석" },
     { id: "cart" as Page, icon: ShoppingCart, label: "장바구니", badge: cartItems.length },
-    { id: "notifications" as Page, icon: Bell, label: "알림", badge: 2 },
-    { id: "chatbot" as Page, icon: MessageSquare, label: "AI 챗봇" },
+    { id: "notifications" as Page, icon: Bell, label: "알림", badge: unreadCount },
     { id: "profile" as Page, icon: User, label: "마이페이지" },
   ];
 
@@ -378,7 +565,11 @@ export default function App() {
       <header className="bg-white border-b sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-3">
+            <button
+              className="flex items-center gap-3 text-left"
+              onClick={() => handleNavigate("home")}
+              type="button"
+            >
               <div className="bg-blue-600 p-2 rounded-lg">
                 <Building2 className="h-6 w-6 text-white" />
               </div>
@@ -388,7 +579,7 @@ export default function App() {
                   Smart Procurement Platform
                 </p>
               </div>
-            </div>
+            </button>
 
             {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center gap-1">
@@ -405,14 +596,15 @@ export default function App() {
                   >
                     <Icon className="h-4 w-4 mr-2" />
                     {item.label}
-                    {item.badge && item.badge > 0 && (
+                    {item.badge && item.badge > 0 ? (
                       <Badge className="ml-2 h-5 w-5 flex items-center justify-center p-0 text-xs">
                         {item.badge}
                       </Badge>
-                    )}
+                    ) : null}
                   </Button>
                 );
               })}
+
               <Button variant="ghost" size="sm" onClick={handleLogout}>
                 <LogOut className="h-4 w-4 mr-2" />
                 로그아웃
@@ -447,11 +639,11 @@ export default function App() {
                   >
                     <Icon className="h-4 w-4 mr-3" />
                     {item.label}
-                    {item.badge && item.badge > 0 && (
+                    {item.badge && item.badge > 0 ? (
                       <Badge className="ml-auto h-5 w-5 flex items-center justify-center p-0 text-xs">
                         {item.badge}
                       </Badge>
-                    )}
+                    ) : null}
                   </Button>
                 );
               })}
@@ -467,23 +659,31 @@ export default function App() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {currentPage === "home" && (
-          <HomeLanding
+          <HomeContent
+            isAuthenticated
+            userEmail={userEmail}
+            cartCount={cartItems.length}
+            unreadCount={unreadCount}
+            onNavigate={(p) => handleNavigate(p)}
             onGoLogin={() => navigateTo("login")}
             onGoSignup={() => navigateTo("signup")}
-            onNavigate={(p) => handleNavigate(p)}
+            onLogout={handleLogout}
+            onOpenChatbot={() => setChatbotOpen(true)}
           />
         )}
 
-        {currentPage === "dashboard" && (
-          <Dashboard onNavigate={handleNavigate} cart={cartItems} />
-        )}
+        {currentPage === "dashboard" && <Dashboard onNavigate={handleNavigate} cart={cartItems} />}
+
         {currentPage === "bids" && (
           <BidDiscovery onNavigate={handleNavigate} onAddToCart={handleAddToCart} />
         )}
+
         {currentPage === "analytics" && <AnalyticsReport />}
+
         {currentPage === "summary" && (
           <BidSummary bidId={selectedBidId} onNavigate={handleNavigate} />
         )}
+
         {currentPage === "cart" && (
           <CartPage
             cartItems={cartItems}
@@ -491,8 +691,9 @@ export default function App() {
             onNavigate={handleNavigate}
           />
         )}
+
         {currentPage === "notifications" && <NotificationsPage onNavigate={handleNavigate} />}
-        {currentPage === "chatbot" && <ChatbotPage />}
+
         {currentPage === "profile" && <ProfilePage userEmail={userEmail} />}
       </main>
 
@@ -502,13 +703,40 @@ export default function App() {
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-sm text-muted-foreground">© 2026 입찰 인텔리전스. All rights reserved.</p>
             <div className="flex gap-4 text-sm text-muted-foreground">
-              <a href="#" className="hover:text-blue-600">이용약관</a>
-              <a href="#" className="hover:text-blue-600">개인정보처리방침</a>
-              <a href="#" className="hover:text-blue-600">고객지원</a>
+              <a href="#" className="hover:text-blue-600">
+                이용약관
+              </a>
+              <a href="#" className="hover:text-blue-600">
+                개인정보처리방침
+              </a>
+              <a href="#" className="hover:text-blue-600">
+                고객지원
+              </a>
             </div>
           </div>
         </div>
       </footer>
+
+      {/* 우측 하단 챗봇 버튼(FAB) */}
+      <button
+        type="button"
+        onClick={() => setChatbotOpen(true)}
+        className="fixed bottom-6 right-6 z-40"
+        aria-label="AI 챗봇 열기"
+      >
+        <div className="shadow-lg rounded-full">
+          <Button className="rounded-full h-12 w-12 p-0">
+            <MessageSquare className="h-5 w-5" />
+          </Button>
+        </div>
+      </button>
+
+      <ChatbotModal
+        open={chatbotOpen}
+        onClose={() => setChatbotOpen(false)}
+        isAuthenticated={isAuthenticated}
+        onGoLogin={() => navigateTo("login", undefined, true)}
+      />
     </div>
   );
 }
