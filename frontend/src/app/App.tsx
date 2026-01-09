@@ -34,6 +34,8 @@ import {
 } from "lucide-react";
 
 import { toast, Toaster } from "sonner";
+import {ResetPasswordPage} from "./components/ResetPasswordPage";
+import {FindAccountPage} from "./components/FindAccount";
 
 /**
  * 중요:
@@ -48,7 +50,7 @@ function isNavState(v: unknown): v is NavState {
 }
 
 function isPublicPage(page: Page) {
-  return page === "home" || page === "login" || page === "signup";
+  return page === "home" || page === "login" || page === "signup" || page === "findAccount" || page === "resetPassword";
 }
 
 /** 챗봇 모달 */
@@ -430,12 +432,49 @@ export default function App() {
       return (
         <>
           <Toaster position="top-right" />
-          <LoginPage onLogin={handleLogin} onNavigateToSignup={() => navigateTo("signup")} />
+          <LoginPage onLogin={handleLogin}
+                     onNavigateToSignup={() => navigateTo("signup")}
+                     onNavigateToFindAccount={() => navigateTo("findAccount")}
+                     onNavigateToResetPassword={() => navigateTo("resetPassword")}
+
+          />
+
         </>
       );
     }
+      if (currentPage === "findAccount") {
+          return (
+              <>
+                  <Toaster position="top-right" />
+                  <FindAccountPage
+                      onFindAccount={(payload) => {
+                          //  임시는 토스트만 띄워도 연결 확인 가능
+                          toast.success("계정 찾기 요청이 전달되었습니다.");
+                          console.log("findAccount payload:", payload);
+                      }}
+                      onNavigateToLogin={() => navigateTo("login")}
+                  />
+              </>
+          );
+      }
 
-    // 비로그인 home
+      if (currentPage === "resetPassword") {
+          return (
+              <>
+                  <Toaster position="top-right" />
+                  <ResetPasswordPage
+                      onRequestReset={(payload) => {
+                          toast.success("비밀번호 재설정 요청이 전달되었습니다.");
+                          console.log("resetPassword payload:", payload);
+                      }}
+                      onNavigateToLogin={() => navigateTo("login", undefined, true)}
+                  />
+              </>
+          );
+      }
+
+
+      // 비로그인 home
     return (
       <div className="min-h-screen bg-gray-50">
         <Toaster position="top-right" />

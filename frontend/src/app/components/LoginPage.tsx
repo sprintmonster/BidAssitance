@@ -12,9 +12,6 @@ export interface LoginPageProps {
     onNavigateToResetPassword?: () => void;
 }
 
-
-
-
 export function LoginPage({
                               onLogin,
                               onNavigateToSignup,
