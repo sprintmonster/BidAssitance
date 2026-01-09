@@ -216,7 +216,7 @@ export function SignupPage({ onSignup, onNavigateToLogin }: SignupPageProps) {
 
             setSuccess("가입이 완료됐어요! 로그인 페이지로 이동합니다.");
 
-            onSignup(newUser.email); // 기존 콜백 유지 (추적/토스트 등 용도)
+            // onSignup(newUser.email); // 기존 콜백 유지 (추적/토스트 등 용도)
 
             // 가입 성공 시 로그인으로 이동
             setTimeout(() => {
